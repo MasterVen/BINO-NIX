@@ -1,5 +1,7 @@
 const gulp = require('gulp');
 const sass = require('gulp-sass');
+sass.compiler = require('sass');
+const Fiber = require('fibers');
 const plumber = require('gulp-plumber');
 const autoprefixer = require('gulp-autoprefixer');
 const browserSync = require('browser-sync').create();
@@ -13,46 +15,59 @@ const svgSprite = require('gulp-svg-sprite');
 const svgmin = require('gulp-svgmin');
 const cheerio = require('gulp-cheerio');
 const replace = require('gulp-replace');
+const {src, dest, series, watch} = gulp
 
-gulp.task('sass', function () {
-  return gulp.src('scss/style.scss')
+function taskSass(cb) {
+  return src('scss/style.scss')
       .pipe(plumber())
       .pipe(sourceMaps.init())
-      .pipe(sass())
+      .pipe(
+        sass(
+          {
+            includePaths: ['./node_modules'],
+            fiber: Fiber
+          })
+          .on('error', sass.logError)
+        )
       .pipe(autoprefixer({
         browsers: ['last 2 version']
       }))
       .pipe(sourceMaps.write())
-      .pipe(gulp.dest('build/css'))
+      .pipe(dest('build/css'))
       .pipe(browserSync.reload({stream: true}));
-});
+      cb();
+};
 
-gulp.task('html', function () {
-  return gulp.src('*.html')
-      .pipe(gulp.dest('build'))
+function html(cb) {
+  return src('*.html')
+      .pipe(dest('build'))
       .pipe(browserSync.reload({stream: true}));
-});
+      cb();
+};
 
-gulp.task('js', function () {
-  return gulp.src('js/**/*.js')
-      .pipe(gulp.dest('build/js'))
+function js(cb) {
+  return src('js/**/*.js')
+      .pipe(dest('build/js'))
       .pipe(browserSync.reload({stream: true}));
-});
+      cb();
+};
 
-gulp.task('css', function () {
-  return gulp.src('css/**/*.css')
-      .pipe(gulp.dest('build/css'))
+function css(cb) {
+  return src('css/**/*.css')
+      .pipe(dest('build/css'))
       .pipe(browserSync.reload({stream: true}));
-});
+      cb();
+};
 
-gulp.task('allimg', function () {
-  return gulp.src('img/**/*.{png,jpg}')
-      .pipe(gulp.dest('build/img'))
+function allimg(cb) {
+  return src('img/**/*.{png,jpg}')
+      .pipe(dest('build/img'))
       .pipe(browserSync.reload({stream: true}));
-});
+      cb();
+};
 
-gulp.task('images', function () {
-  return gulp.src('build/img/**/*.{png,jpg}')
+function images(cb) {
+  return src('build/img/**/*.{png,jpg}')
       .pipe(imagemin([
         imagemin.jpegtran({progressive: true}),
         imageminJpegRecompress({
@@ -64,11 +79,12 @@ gulp.task('images', function () {
         imagemin.optipng({optimizationLevel: 3}),
         pngquant({quality: '65-70', speed: 5})
       ]))
-      .pipe(gulp.dest('build/img'));
-});
+      .pipe(dest('build/img'));
+      cb();
+};
 
-gulp.task('svg', function () {
-  return gulp.src('img/**/*.svg')
+function svg(cb) {
+  return src('img/**/*.svg')
       .pipe(svgmin({
         js2svg: {
           pretty: true
@@ -91,24 +107,12 @@ gulp.task('svg', function () {
           }
         }
       }))
-      .pipe(gulp.dest('build/img'));
-});
+      .pipe(dest('build/img'));
+      cb();
+};
 
-gulp.task('serve', function () {
-  browserSync.init({
-    server: "build"
-  });
-
-  gulp.watch("scss/**/*.scss", ["sass"]);
-  gulp.watch("*.html", ["html"]);
-  gulp.watch("js/**/*.js", ["js"]);
-  gulp.watch("css/**/*.css", ["css"]);
-  gulp.watch("img/**/*.{png,jpg}", ["allimg"]);
-  gulp.watch("img/**/*.{svg}", ["svg"]);
-});
-
-gulp.task('copy', function () {
-  return gulp.src([
+function copy(cb) {
+  return src([
     'img/**',
     'js/**',
     'css/**',
@@ -116,21 +120,43 @@ gulp.task('copy', function () {
   ], {
     base: '.'
   })
-      .pipe(gulp.dest('build'));
+      .pipe(dest('build'));
+  cb();
+};
 
-});
-
-gulp.task('clean', function () {
+function clean(cb) {
   return del('build');
-});
+  cb();
+};
 
-gulp.task('build', function (fn) {
-  run(
-      'clean',
-      'copy',
-      'sass',
-      'images',
-      'svg',
-      fn
-  );
-});
+exports.build = series(clean, copy, taskSass, images, svg);
+
+exports.default = function () {
+  browserSync.init({
+    server: "build"
+  });
+
+  watch("scss/**/*.scss", taskSass);
+  watch("*.html", html);
+  watch("js/**/*.js", js);
+  watch("css/**/*.css", css);
+  watch("img/**/*.{png,jpg}", allimg);
+  watch("img/**/*.{svg}", svg);
+  // cb();
+}
+
+
+// function serve(cb) {
+//   browserSync.init({
+//     server: "build"
+//   });
+//
+//   watch("scss/**/*.scss", taskSass, cb);
+//   watch("*.html", html, cb);
+//   watch("js/**/*.js", js, cb);
+//   watch("css/**/*.css", css, cb);
+//   watch("img/**/*.{png,jpg}", allimg, cb);
+//   watch("img/**/*.{svg}", svg, cb);
+//   // cb();
+// };
+
