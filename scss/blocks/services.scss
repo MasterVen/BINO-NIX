@@ -1,0 +1,143 @@
+.service {
+background-color: $service-bg;
+max-width: 1920px;
+margin: 140px auto;
+padding: 150px 0;
+position: relative;
+
+&::after {
+  content: "";
+  width: 46%;
+  height: 100%;
+  display: block;
+  background: url('../img/services-bg.jpg') right top no-repeat;
+  background-size: cover;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.service__block {
+  width: 54%;
+  text-align: right;
+}
+
+.service__title {
+  font-size: 2.25rem;
+  line-height: 2.25rem;
+  color: $white-gray;
+  letter-spacing: 3.6px;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-family: "Source Sans Pro", sans-serif;
+  padding-right: 25px;
+  border-right: 6px solid $red;
+  margin-right: 80px;
+  margin-bottom: 30px;
+}
+
+.service__element {
+  max-width: 665px;
+  margin: 55px 80px 55px auto;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  p {
+    font-size: 0.9rem;
+    line-height: 1.8rem;
+    color: $text-color;
+    font-family: "Source Sans Pro", sans-serif;
+
+    &:first-of-type {
+      text-transform: uppercase;
+      color: $red;
+    }
+  }
+
+  .service__icon {
+    width: 64px;
+    height: 64px;
+    border: 5px solid rgba(0, 0, 0, 0.10);
+    position: absolute;
+    right: -117px;
+    top: 50%;
+    transform: translate(0, -50%);
+    z-index: 1;
+    border-radius: 50%;
+    background-color: $white-gray;
+
+    img, svg {
+      fill: $red;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+  }
+
+  .service__img {
+    width: 27px;
+    height: 27px;
+  }
+
+  .service__img1 {
+    width: 35px;
+    height: 29px;
+  }
+
+  .service__img2 {
+    width: 35px;
+    height: 30px;
+  }
+
+}
+}
+
+@media (max-width: 1020px) {
+
+  .service {
+    margin: 50px 0;
+    padding: 50px 0;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .service {
+    padding-left: 15px;
+    padding-right: 15px;
+
+    &::after {
+      display: none;
+    }
+
+    .service__block {
+      width: 100%;
+      text-align: left;
+    }
+
+    .service__title {
+      padding-right: 0;
+      padding-left: 25px;
+      border-right: none;
+      border-left: 6px solid $red;
+    }
+
+    .service__element {
+      max-width: 100%;
+      margin: 25px 0;
+      padding-right: 80px;
+      box-sizing: border-box;
+
+      .service__icon {
+        right: 0;
+      }
+    }
+  }
+
+}
